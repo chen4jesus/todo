@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { Text, TextInput, Button, Chip, Menu, Switch, Divider } from 'react-native-paper';
+import { Text, TextInput, Button, Chip, Menu, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
-import { RootStackParamList } from '../navigation/AppNavigator.tsx';
-import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme.ts';
-import { useTask } from '../hooks/useTask.ts';
-import { Task, Category } from '../types.ts';
+import { RootStackParamList } from '../navigation/AppNavigator.js';
+import { COLORS, SIZES, FONTS } from '../constants/theme.js';
+import { useTask } from '../hooks/useTask.js';
+import { Category, Task } from '../types.js';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
-type CreateTaskNavigationProp = StackNavigationProp<RootStackParamList>;
+type EditTaskNavigationProp = StackNavigationProp<RootStackParamList>;
+type EditTaskRouteProp = RouteProp<RootStackParamList, 'EditTaskScreen'>;
 
 const priorityOptions = [
   { value: 'low', label: 'Low', icon: 'flag-outline', color: COLORS.grey4 },
@@ -19,9 +20,11 @@ const priorityOptions = [
   { value: 'high', label: 'High', icon: 'flag', color: COLORS.error },
 ];
 
-const CreateTaskScreen = () => {
-  const navigation = useNavigation<CreateTaskNavigationProp>();
-  const { addTask, categories } = useTask();
+const EditTaskScreen = () => {
+  const navigation = useNavigation<EditTaskNavigationProp>();
+  const route = useRoute<EditTaskRouteProp>();
+  const { updateTask, categories, getTaskById } = useTask();
+  const taskId = route.params?.taskId;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -37,7 +40,7 @@ const CreateTaskScreen = () => {
   }>({ type: null, interval: 1 });
   const [notes, setNotes] = useState('');
   const [symbol, setSymbol] = useState<string | null>(null);
-  
+
   // UI state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -46,7 +49,27 @@ const CreateTaskScreen = () => {
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showSymbolMenu, setShowSymbolMenu] = useState(false);
   const [dateType, setDateType] = useState<'dueDate' | 'reminderTime' | 'repeatEndDate'>('dueDate');
-  
+
+  useEffect(() => {
+    const loadTaskData = async () => {
+      if (taskId) {
+        const task = await getTaskById(taskId);
+        if (task) {
+          setTitle(task.title);
+          setDescription(task.description || '');
+          setDueDate(task.dueDate ? new Date(task.dueDate) : null);
+          setReminderTime(task.reminderTime ? new Date(task.reminderTime) : null);
+          setCategoryId(task.category || null);
+          setPriority(task.priority || null);
+          setRepeat(task.repeat || { type: null, interval: 1 });
+          setNotes(task.notes || '');
+          setSymbol(task.symbol || null);
+        }
+      }
+    };
+    loadTaskData();
+  }, [taskId, getTaskById]);
+
   const handleSaveTask = async () => {
     if (!title.trim()) {
       // Show error for empty title
@@ -54,10 +77,9 @@ const CreateTaskScreen = () => {
     }
 
     try {
-      const newTask = {
+      const updatedTask = {
         title,
         description,
-        completed: false,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         reminderTime: reminderTime ? new Date(reminderTime) : undefined,
         category: categoryId || undefined,
@@ -74,10 +96,12 @@ const CreateTaskScreen = () => {
           : undefined,
       };
 
-      await addTask(newTask);
+      if (taskId) {
+        await updateTask(taskId, updatedTask);
+      }
       navigation.goBack();
     } catch (error) {
-      console.error('Error creating task:', error);
+      console.error('Error updating task:', error);
       // Show error message
     }
   };
@@ -113,7 +137,7 @@ const CreateTaskScreen = () => {
   const renderCategoryChip = () => {
     if (!categoryId) return null;
     
-    const category = categories.find(c => c.id === categoryId);
+    const category = categories.find((c: Category) => c.id === categoryId);
     if (!category) return null;
     
     return (
@@ -268,7 +292,7 @@ const CreateTaskScreen = () => {
                 </TouchableOpacity>
               }
             >
-              {categories.map(category => (
+              {categories.map((category: Category) => (
                 <Menu.Item
                   key={category.id}
                   onPress={() => {
@@ -443,10 +467,10 @@ const CreateTaskScreen = () => {
                 style={styles.optionItem}
                 onPress={() => setShowSymbolMenu(true)}
               >
-                <MaterialCommunityIcons
-                  name={symbol || "emoticon-outline" as keyof typeof MaterialCommunityIcons.glyphMap}
-                  size={24}
-                  color={COLORS.primary}
+                <MaterialCommunityIcons 
+                  name={(symbol as any) || "emoticon-outline"} 
+                  size={24} 
+                  color={COLORS.primary} 
                 />
                 <Text style={styles.optionText}>
                   {symbol ? 'Change symbol' : 'Add symbol'}
@@ -465,7 +489,7 @@ const CreateTaskScreen = () => {
                   }}
                 >
                   <MaterialCommunityIcons
-                    name={iconName as keyof typeof MaterialCommunityIcons.glyphMap}
+                    name={iconName as any}
                     size={28}
                     color={symbol === iconName ? COLORS.primary : COLORS.grey6}
                   />
@@ -482,7 +506,7 @@ const CreateTaskScreen = () => {
           labelStyle={styles.saveButtonLabel}
           buttonColor={COLORS.primary}
         >
-          Save Task
+          Save Changes
         </Button>
       </View>
 
@@ -517,51 +541,39 @@ const styles = StyleSheet.create({
     padding: SIZES.padding,
   },
   input: {
-    backgroundColor: COLORS.white,
-    marginBottom: SIZES.base * 2,
-  },
-  sectionContainer: {
     marginBottom: SIZES.padding,
   },
+  sectionContainer: {
+    marginBottom: SIZES.padding * 2,
+  },
   sectionTitle: {
-    ...FONTS.h4,
-    color: COLORS.grey8,
-    marginBottom: SIZES.base,
+    marginBottom: SIZES.padding,
+    fontSize: SIZES.h4,
     fontWeight: '600',
   },
   optionsContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    overflow: 'hidden',
-    ...SHADOWS.small,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SIZES.padding,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.grey2,
   },
   optionText: {
-    ...FONTS.body2,
-    color: COLORS.grey8,
     marginLeft: SIZES.base,
-    fontWeight: '600',
+    fontSize: SIZES.body1,
   },
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: SIZES.base,
+    marginBottom: SIZES.padding,
   },
   chip: {
-    margin: 4,
+    marginRight: SIZES.base,
+    marginBottom: SIZES.base,
   },
   repeatOptionsContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: SIZES.radius,
-    marginTop: SIZES.base,
-    padding: SIZES.padding,
-    ...SHADOWS.small,
+    marginTop: SIZES.padding,
   },
   repeatOptionItem: {
     flexDirection: 'row',
@@ -570,12 +582,11 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.base,
   },
   repeatOptionLabel: {
-    ...FONTS.body2,
-    color: COLORS.grey7,
+    fontSize: SIZES.body1,
     fontWeight: '600',
   },
   repeatOptionValue: {
-    ...FONTS.body2,
+    fontSize: SIZES.body1,
     color: COLORS.primary,
     fontWeight: '600',
   },
@@ -586,44 +597,30 @@ const styles = StyleSheet.create({
   repeatIntervalButton: {
     width: 30,
     height: 30,
-    borderRadius: 15,
-    backgroundColor: COLORS.grey1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.grey3,
+    borderRadius: 15,
   },
   repeatIntervalValue: {
-    ...FONTS.body1,
-    color: COLORS.grey8,
     marginHorizontal: SIZES.base,
-    minWidth: 30,
-    textAlign: 'center',
+    fontSize: SIZES.body1,
+  },
+  saveButton: {
+    marginTop: SIZES.padding * 2,
+  },
+  saveButtonLabel: {
+    fontSize: SIZES.h5,
     fontWeight: '600',
   },
   symbolsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: SIZES.base,
-    maxWidth: 240,
+    padding: SIZES.padding,
   },
   symbolItem: {
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 4,
-    borderRadius: 24,
-  },
-  saveButton: {
-    marginTop: SIZES.padding,
-    marginBottom: SIZES.padding * 2,
-    borderRadius: SIZES.radius,
-    paddingVertical: 6,
-  },
-  saveButtonLabel: {
-    ...FONTS.button,
-    color: COLORS.white,
-    fontWeight: '600',
+    margin: SIZES.base,
   },
 });
 
-export default CreateTaskScreen; 
+export default EditTaskScreen;

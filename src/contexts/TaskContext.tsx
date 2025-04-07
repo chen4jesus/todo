@@ -21,6 +21,7 @@ export interface TaskContextProps {
   updateCategory: (id: string, updates: Partial<Category>) => Promise<Category | null>;
   deleteCategory: (id: string) => Promise<boolean>;
   assignTaskToCategory: (taskId: string, categoryId: string) => Promise<void>;
+  getTaskById: (id: string) => Promise<Task | null>;
   getTasksByCategory: (categoryId: string) => Promise<Task[]>;
 }
 
@@ -72,6 +73,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
       setError('Failed to fetch tasks. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getTaskById = async (id: string): Promise<Task | null> => {
+    try {
+      return await neo4jService.getTaskById(id);
+    } catch (error) {
+      console.error('Error getting task by id:', error);
+      setError('Failed to get task. Please try again later.');
+      return null;
     }
   };
 
@@ -273,6 +284,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         updateCategory,
         deleteCategory,
         assignTaskToCategory,
+        getTaskById,
         getTasksByCategory,
       }}
     >

@@ -12,6 +12,7 @@ import TasksScreen from '../screens/TasksScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import TaskDetailScreen from '../screens/TaskDetailScreen';
 import CreateTaskScreen from '../screens/CreateTaskScreen';
+import EditTaskScreen from '../screens/EditTaskScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
 import CreateCategoryScreen from '../screens/CreateCategoryScreen';
 import CustomDrawerContent from '../components/CustomDrawerContent';

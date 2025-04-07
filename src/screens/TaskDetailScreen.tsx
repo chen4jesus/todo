@@ -2,21 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, IconButton, Divider, Menu, Checkbox, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { format } from 'date-fns';
-import { RootStackParamList } from '../navigation/AppNavigator';
-import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
-import { useTask } from '../hooks/useTask';
-import { Task } from '../types';
+import { RootStackParamList } from '../navigation/AppNavigator.tsx';
+import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme.ts';
+import { useTask } from '../hooks/useTask.ts';
+import { Task, Category } from '../types.ts';
 
-type TaskDetailScreenRouteProp = RouteProp<RootStackParamList, 'TaskDetail'>;
 type TaskDetailScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const TaskDetailScreen = () => {
-  const route = useRoute<TaskDetailScreenRouteProp>();
+  const route = useRoute();
   const navigation = useNavigation<TaskDetailScreenNavigationProp>();
-  const { taskId } = route.params;
+  const { taskId } = route.params as { taskId: string };
   const { getTaskById, updateTask, deleteTask, toggleTaskCompletion, categories } = useTask();
   
   const [task, setTask] = useState<Task | null>(null);
@@ -56,8 +55,7 @@ const TaskDetailScreen = () => {
   };
 
   const handleEditTask = () => {
-    // For now, navigate to CreateTask (this would be replaced with an EditTask screen)
-    navigation.navigate('CreateTask');
+    navigation.navigate('EditTaskScreen', { taskId: taskId });
   };
 
   const getCategoryName = (categoryId?: string) => {
@@ -254,9 +252,9 @@ const TaskDetailScreen = () => {
               <Text style={styles.sectionTitle}>Symbol</Text>
               <View style={styles.symbolContainer}>
                 <MaterialCommunityIcons 
-                  name={task.symbol} 
-                  size={48} 
-                  color={COLORS.primary} 
+                  name={task.symbol as keyof typeof MaterialCommunityIcons.glyphMap}
+                  size={48}
+                  color={COLORS.primary}
                 />
               </View>
             </View>
@@ -290,6 +288,7 @@ const styles = StyleSheet.create({
     color: COLORS.grey8,
     marginLeft: SIZES.base,
     flex: 1,
+    fontWeight: '600',
   },
   completedText: {
     textDecorationLine: 'line-through',
@@ -306,6 +305,7 @@ const styles = StyleSheet.create({
     ...FONTS.h4,
     color: COLORS.grey8,
     marginBottom: SIZES.base,
+    fontWeight: '600',
   },
   description: {
     ...FONTS.body2,
@@ -314,6 +314,7 @@ const styles = StyleSheet.create({
     padding: SIZES.padding,
     borderRadius: SIZES.radius,
     ...SHADOWS.small,
+    fontWeight: '400',
   },
   divider: {
     backgroundColor: COLORS.grey3,
@@ -333,11 +334,13 @@ const styles = StyleSheet.create({
     color: COLORS.grey7,
     width: 80,
     marginLeft: SIZES.base,
+    fontWeight: '600',
   },
   detailValue: {
     ...FONTS.body2,
     color: COLORS.grey8,
     flex: 1,
+    fontWeight: '600',
   },
   categoryTag: {
     paddingHorizontal: SIZES.base,
@@ -348,6 +351,7 @@ const styles = StyleSheet.create({
   categoryText: {
     ...FONTS.body3,
     color: COLORS.white,
+    fontWeight: '600',
   },
   priorityText: {
     ...FONTS.body2,
@@ -360,6 +364,7 @@ const styles = StyleSheet.create({
     padding: SIZES.padding,
     borderRadius: SIZES.radius,
     ...SHADOWS.small,
+    fontWeight: '400',
   },
   symbolSection: {
     marginBottom: SIZES.padding,
@@ -382,6 +387,7 @@ const styles = StyleSheet.create({
     ...FONTS.body2,
     color: COLORS.grey6,
     marginTop: SIZES.base,
+    fontWeight: '600',
   },
   errorContainer: {
     flex: 1,
@@ -395,6 +401,7 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     marginTop: SIZES.base,
     marginBottom: SIZES.padding,
+    fontWeight: '600',
   },
   backButton: {
     backgroundColor: COLORS.primary,
@@ -405,6 +412,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     ...FONTS.button,
     color: COLORS.white,
+    fontWeight: '600',
   },
 });
 
