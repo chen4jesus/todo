@@ -1,9 +1,12 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Task, Category } from '../types';
-import neo4jService from '../services/neo4jService';
+import { Task, Category } from '../types.ts';
+import neo4jService from '../services/neo4jService.ts';
 
-interface TaskContextProps {
+
+export const TaskContext = createContext<TaskContextProps>({} as TaskContextProps);
+
+export interface TaskContextProps {
   tasks: Task[];
   categories: Category[];
   loading: boolean;
@@ -20,8 +23,6 @@ interface TaskContextProps {
   assignTaskToCategory: (taskId: string, categoryId: string) => Promise<void>;
   getTasksByCategory: (categoryId: string) => Promise<Task[]>;
 }
-
-export const TaskContext = createContext<TaskContextProps>({} as TaskContextProps);
 
 interface TaskProviderProps {
   children: ReactNode;

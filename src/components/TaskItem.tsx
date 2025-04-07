@@ -5,10 +5,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
-import { Task } from '../types';
-import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme';
-import { useTask } from '../hooks/useTask';
+import { RootStackParamList } from '../navigation/AppNavigator.tsx';
+import { Task } from '../types.ts';
+import { COLORS, SIZES, FONTS, SHADOWS } from '../constants/theme.ts';
+import { useTask } from '../hooks/useTask.ts';
 
 type TaskDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'TaskDetail'>;
 
@@ -96,7 +96,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
               icon="dots-vertical"
               size={20}
               onPress={openMenu}
-              color={COLORS.grey5}
             />
           }
         >
@@ -121,10 +120,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
         
         {task.symbol && (
           <MaterialCommunityIcons
-            name={task.symbol}
+            name={task.symbol as keyof typeof MaterialCommunityIcons.glyphMap}
             size={20}
             color={COLORS.accent}
-            style={styles.symbolIcon}
           />
         )}
       </View>
@@ -136,11 +134,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.grey0,
+    borderColor: COLORS.grey2,
+    borderWidth: 1,
     borderRadius: SIZES.radius,
     marginBottom: SIZES.base,
     padding: SIZES.base,
-    ...SHADOWS.small,
   },
   completedTask: {
     backgroundColor: COLORS.grey1,
@@ -157,8 +156,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    ...FONTS.body1,
+    ...FONTS.h5,
     marginBottom: 4,
+    fontWeight: '500',
   },
   completedText: {
     textDecorationLine: 'line-through',
@@ -171,8 +171,9 @@ const styles = StyleSheet.create({
   },
   dateText: {
     ...FONTS.body3,
-    color: COLORS.grey5,
-    marginLeft: 4,
+    color: COLORS.grey6,
+    marginLeft: 8,
+    fontWeight: '400',
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
   categoryText: {
     ...FONTS.body3,
     color: COLORS.grey6,
+    fontWeight: '500',
   },
   symbolIcon: {
     marginLeft: SIZES.base,

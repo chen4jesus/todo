@@ -71,8 +71,8 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Text style={styles.greeting}>Hello, John!</Text>
-        <Text style={styles.date}>{format(new Date(), 'EEEE, MMMM d')}</Text>
+        <Text style={styles.greeting}>Hello, User!</Text>
+        <Text style={styles.date}>{format(new Date(), 'EEEE, MMMM d, yyyy')}</Text>
 
         {/* Progress Card */}
         <Card style={styles.progressCard}>
@@ -216,23 +216,23 @@ const styles = StyleSheet.create({
   },
   greeting: {
     ...FONTS.h2,
-    color: COLORS.grey8,
+    color: COLORS.primary,
     marginTop: SIZES.base,
   },
   date: {
     ...FONTS.body2,
-    color: COLORS.grey5,
+    color: COLORS.grey6,
     marginBottom: SIZES.padding,
   },
   progressCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.primary,
     borderRadius: SIZES.radius,
     marginBottom: SIZES.padding,
     ...SHADOWS.medium,
   },
   progressTitle: {
     ...FONTS.h4,
-    color: COLORS.grey8,
+    color: COLORS.white,
     marginBottom: SIZES.base,
   },
   progressInfo: {
@@ -243,11 +243,11 @@ const styles = StyleSheet.create({
   },
   progressPercentage: {
     ...FONTS.h2,
-    color: COLORS.primary,
+    color: COLORS.white,
   },
   progressStats: {
     ...FONTS.body3,
-    color: COLORS.grey5,
+    color: COLORS.white,
   },
   progressBar: {
     height: 8,

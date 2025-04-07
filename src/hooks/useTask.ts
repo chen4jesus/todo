@@ -1,7 +1,7 @@
 import { useContext } from 'react';
-import { TaskContext } from '../contexts/TaskContext';
+import { TaskContext, TaskContextProps } from '../contexts/TaskContext.tsx';
 
-export const useTask = () => {
+export const useTask = (): TaskContextProps => {
   const context = useContext(TaskContext);
   
   if (context === undefined) {
@@ -9,4 +9,4 @@ export const useTask = () => {
   }
   
   return context;
-}; 
+};
